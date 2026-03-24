@@ -1,0 +1,22 @@
+# 虚拟环境
+venv/
+.venv/
+env/
+
+# 向量数据库存储
+chroma_db/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 环境变量文件
+.env
+
+# IDE 配置
+.vscode/
+.idea/
+
+# 临时文件
+*.log
+.DS_Store
