@@ -1,7 +1,7 @@
 import os
 import chromadb
-from chromadb.utils import embedding_functions
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from embeddings import get_embedding_function
 
 def read_text_file_safely(file_path):
     """尽量安全地读取文本文件，遇到二进制或编码问题时返回None。"""
@@ -24,14 +24,11 @@ def read_text_file_safely(file_path):
 
 def index_code_repo(repo_path, collection_name="code_knowledge"):
     """将代码仓库的所有文件分块并索引到Chroma"""
-    # 检查是否有 zhipuai 的 embedding key，优先使用智谱AI的Embedding，否则使用本地模型
-    from config import ZHIPUAI_API_KEY
-    if ZHIPUAI_API_KEY and ZHIPUAI_API_KEY != "31fcf7a4f3d543049cf3b06f7e7c4ed1.cLO88zeJAg7n9AKP":
-        embedding_fn = embedding_functions.ZhipuAIEmbeddingFunction(api_key=ZHIPUAI_API_KEY)
-    else:
-        embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
+    # 优先使用智谱 Embedding；未配置 key 时回退到本地 sentence-transformers
+    from config import ZHIPUAI_API_KEY, CHROMA_DB_PATH
+    embedding_fn = get_embedding_function(ZHIPUAI_API_KEY, use_local=True)
     
-    client = chromadb.PersistentClient(path="./chroma_db")
+    client = chromadb.PersistentClient(path=CHROMA_DB_PATH)
     collection = client.get_or_create_collection(
         name=collection_name,
         embedding_function=embedding_fn
@@ -39,10 +36,18 @@ def index_code_repo(repo_path, collection_name="code_knowledge"):
     
     # 遍历所有文件
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    excluded_dirs = {
+        ".git",
+        "__pycache__",
+        ".venv",
+        "venv",
+        "env",
+        "chroma_db",
+        "chroma_db_zhipu",
+    }
     for root, dirs, files in os.walk(repo_path):
-        # 忽略 .git 等目录
-        if ".git" in dirs:
-            dirs.remove(".git")
+        # 原地过滤目录，防止继续向下遍历。
+        dirs[:] = [d for d in dirs if d not in excluded_dirs]
         for file in files:
             if file.endswith(('.py', '.md', '.txt')):  # 只索引这些类型
                 file_path = os.path.join(root, file)

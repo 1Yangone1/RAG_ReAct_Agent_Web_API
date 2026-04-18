@@ -1,0 +1,6 @@
+chromadb==0.4.24
+langchain-text-splitters==0.2.2
+sentence-transformers==2.2.2
+zhipuai==1.0.5
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
