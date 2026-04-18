@@ -86,6 +86,9 @@ uvicorn app:app --reload
   "answer": "..."
 }
 ```
+<img width="1415" height="1368" alt="d90af001fc9a31aa9717ab250dc3e414" src="https://github.com/user-attachments/assets/c7acd1e6-ef30-4eb0-aaf3-db5e2962653e" />
+<img width="969" height="630" alt="a5e7310190748485a429c51b9a525718" src="https://github.com/user-attachments/assets/a6cad9b5-efc9-40aa-89d6-ae475ebe6da8" />
+
 
 ## 常见问题
 
